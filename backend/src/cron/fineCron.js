@@ -2,12 +2,11 @@ const cron = require("node-cron");
 const Transaction = require("../models/Transaction");
 const {
   calculateFine,
-  getLateMinutes,
-  EMAIL_REMINDER_INTERVAL_MINUTES,
+  getLateDays,
 } = require("../utils/fine");
 const { hasEmailConfig, sendFineReminderEmail } = require("../services/emailService");
 
-const updateMinuteWiseFines = async () => {
+const updateDailyFines = async () => {
   const now = new Date();
   const pending = await Transaction.find({ status: { $in: ["issued", "overdue"] } });
 
@@ -46,15 +45,15 @@ const notifyOverdueFines = async () => {
       }
 
       const lastNotifiedAt = tx.lastFineNotifiedAt ? new Date(tx.lastFineNotifiedAt) : null;
-      const elapsedMinutes = lastNotifiedAt
-        ? (now - lastNotifiedAt) / (1000 * 60)
-        : EMAIL_REMINDER_INTERVAL_MINUTES;
+      const elapsedHours = lastNotifiedAt
+        ? (now - lastNotifiedAt) / (1000 * 60 * 60)
+        : 24;
 
-      if (elapsedMinutes < EMAIL_REMINDER_INTERVAL_MINUTES) {
+      if (elapsedHours < 24) {
         return;
       }
 
-      if (getLateMinutes(tx.dueDate, now) < 1) {
+      if (getLateDays(tx.dueDate, now) < 1) {
         return;
       }
 
@@ -76,15 +75,15 @@ const notifyOverdueFines = async () => {
 };
 
 const startFineCron = () => {
-  cron.schedule("* * * * *", async () => {
+  cron.schedule("0 * * * *", async () => {
     try {
-      await updateMinuteWiseFines();
+      await updateDailyFines();
     } catch (error) {
       console.error("Fine cron failed:", error.message);
     }
   });
 
-  cron.schedule("*/5 * * * *", async () => {
+  cron.schedule("0 9 * * *", async () => {
     try {
       await notifyOverdueFines();
     } catch (error) {
@@ -92,7 +91,7 @@ const startFineCron = () => {
     }
   });
 
-  console.log("Minute fine cron and email reminder cron started");
+  console.log("Daily fine calculation and 9 AM email reminder cron started");
 };
 
 module.exports = { startFineCron };

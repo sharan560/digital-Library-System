@@ -27,8 +27,10 @@ const buildBookFilter = ({ q, genre, author, availability }) => {
     filter.author = { $regex: escapeRegex(author), $options: "i" };
   }
 
-  if (availability !== undefined && availability !== "") {
-    filter.availability = availability === "true";
+  if (availability === "true") {
+    filter.availability = true;
+  } else if (availability === "false") {
+    filter.availability = false;
   }
 
   return filter;

@@ -94,7 +94,7 @@ const SignupPage = () => {
             checked={form.emailNotificationsOptIn}
             onChange={(e) => setForm({ ...form, emailNotificationsOptIn: e.target.checked })}
           />
-          <span className="ui-muted">Send email reminders every 5 minutes when overdue fines are active.</span>
+          <span className="ui-muted">Send daily email reminders at 9 AM when overdue fines are active.</span>
         </label>
 
         <button className="ui-btn-primary w-full justify-center py-3 text-center">Create Account</button>

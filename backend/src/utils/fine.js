@@ -1,24 +1,20 @@
-const FINE_PER_MINUTE = Number(process.env.FINE_PER_MINUTE || 1);
-const EMAIL_REMINDER_INTERVAL_MINUTES = Number(
-  process.env.EMAIL_REMINDER_INTERVAL_MINUTES || 5
-);
+const DAILY_FINE = Number(process.env.DAILY_FINE || 10);
 
-const getLateMinutes = (dueDate, referenceDate = new Date()) => {
+const getLateDays = (dueDate, referenceDate = new Date()) => {
   if (!dueDate || referenceDate <= dueDate) {
     return 0;
   }
 
-  return Math.ceil((referenceDate - dueDate) / (1000 * 60));
+  return Math.floor((referenceDate - dueDate) / (1000 * 60 * 60 * 24));
 };
 
 const calculateFine = (dueDate, referenceDate = new Date()) => {
-  const lateMinutes = getLateMinutes(dueDate, referenceDate);
-  return lateMinutes * FINE_PER_MINUTE;
+  const lateDays = getLateDays(dueDate, referenceDate);
+  return Math.max(0, lateDays * DAILY_FINE);
 };
 
 module.exports = {
-  FINE_PER_MINUTE,
-  EMAIL_REMINDER_INTERVAL_MINUTES,
-  getLateMinutes,
+  DAILY_FINE,
+  getLateDays,
   calculateFine,
 };

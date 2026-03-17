@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import BookCard from "../components/BookCard";
 import SearchBar from "../components/SearchBar";
 import { booksApi, reservationsApi, transactionsApi } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import useDebouncedValue from "../hooks/useDebouncedValue";
+
+const DEFAULT_FILTERS = { q: "", genre: "", author: "", sort: "latest", availability: "" };
+const isAvailabilityFilter = (value) => value === "true" || value === "false";
 
 const BooksPage = () => {
   const { user } = useAuth();
@@ -22,27 +25,67 @@ const BooksPage = () => {
   const [page, setPage] = useState(1);
   const [meta, setMeta] = useState({ totalPages: 1 });
   const [searchMeta, setSearchMeta] = useState({ genres: [], authors: [], suggestions: [] });
-  const [filters, setFilters] = useState({ q: "", genre: "", author: "", sort: "latest", availability: "" });
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [message, setMessage] = useState("");
   const debouncedQuery = useDebouncedValue(filters.q, 280);
   const debouncedAuthor = useDebouncedValue(filters.author, 280);
+  const booksRequestRef = useRef(0);
+  const searchMetaRequestRef = useRef(0);
 
   const activeFilterCount = [filters.q, filters.genre, filters.author, filters.availability].filter(Boolean).length;
 
-  const fetchBooks = async () => {
-    const { data } = await booksApi.list({ ...filters, q: debouncedQuery, author: debouncedAuthor, page, limit: 8 });
+  const fetchBooks = async (overrides = {}) => {
+    const requestId = ++booksRequestRef.current;
+    const requestFilters = { ...filters, ...overrides };
+    const requestPage = overrides.page ?? page;
+    const genreValue = (requestFilters.genre || "").trim();
+    const queryValue = (overrides.q ?? debouncedQuery ?? "").trim();
+    const authorValue = (overrides.author ?? debouncedAuthor ?? "").trim();
+    const availabilityValue = isAvailabilityFilter(requestFilters.availability)
+      ? requestFilters.availability
+      : undefined;
+
+    const params = {
+      page: requestPage,
+      limit: 8,
+      sort: requestFilters.sort || "latest",
+    };
+
+    if (queryValue) params.q = queryValue;
+    if (authorValue) params.author = authorValue;
+    if (genreValue) params.genre = genreValue;
+    if (availabilityValue) params.availability = availabilityValue;
+
+    const { data } = await booksApi.list(params);
+
+    if (requestId !== booksRequestRef.current) {
+      return;
+    }
+
     setBooks(data.data);
     setMeta(data.pagination);
   };
 
   const fetchSearchMeta = async () => {
-    const { data } = await booksApi.searchMeta({ q: debouncedQuery });
+    const requestId = ++searchMetaRequestRef.current;
+    const { data } = await booksApi.searchMeta({ q: (debouncedQuery || "").trim() });
+
+    if (requestId !== searchMetaRequestRef.current) {
+      return;
+    }
+
     setSearchMeta(data.data);
   };
 
   useEffect(() => {
     setPage(1);
   }, [debouncedQuery, debouncedAuthor, filters.genre, filters.sort, filters.availability]);
+
+  useEffect(() => {
+    if (!isAvailabilityFilter(filters.availability) && filters.availability !== "") {
+      setFilters((prev) => ({ ...prev, availability: "" }));
+    }
+  }, [filters.availability]);
 
   useEffect(() => {
     fetchBooks();
@@ -91,7 +134,7 @@ const BooksPage = () => {
   };
 
   const resetSearch = () => {
-    setFilters({ q: "", genre: "", author: "", sort: "latest", availability: "" });
+    setFilters(DEFAULT_FILTERS);
     setMessage("");
   };
 
@@ -116,14 +159,21 @@ const BooksPage = () => {
       if (value !== null && value !== "") formData.append(key, value);
     });
 
-    if (editingId) {
-      await booksApi.update(editingId, formData);
-    } else {
-      await booksApi.create(formData);
-    }
+    try {
+      if (editingId) {
+        await booksApi.update(editingId, formData);
+      } else {
+        await booksApi.create(formData);
+      }
 
-    resetForm();
-    fetchBooks();
+      resetForm();
+      setPage(1);
+      setFilters(DEFAULT_FILTERS);
+      await fetchBooks({ ...DEFAULT_FILTERS, page: 1, q: "", author: "" });
+      setMessage(editingId ? "Book updated successfully." : "Book added successfully.");
+    } catch (error) {
+      setMessage(error.response?.data?.message || "Could not save book.");
+    }
   };
 
   return (

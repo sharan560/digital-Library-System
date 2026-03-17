@@ -69,7 +69,14 @@ const SearchBar = ({ filters, setFilters, meta, totalResults, onReset, activeFil
           <option value="popularity">Popularity</option>
           <option value="alphabetical">A-Z</option>
         </select>
-        <select value={filters.availability} onChange={(e) => update("availability", e.target.value)} className="ui-input">
+        <select
+          value={filters.availability}
+          onChange={(e) => {
+            const nextValue = e.target.value;
+            update("availability", nextValue === "true" || nextValue === "false" ? nextValue : "");
+          }}
+          className="ui-input"
+        >
           <option value="">All stock</option>
           <option value="true">Available</option>
           <option value="false">Unavailable</option>
