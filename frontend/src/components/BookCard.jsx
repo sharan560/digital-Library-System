@@ -17,7 +17,7 @@ const BookCard = ({ book, onIssue, onReserve, isAdmin, onDelete, onEdit }) => {
       animate={{ opacity: 1, y: 0 }}
       className="ui-panel overflow-hidden shadow-xl"
     >
-      <img src={imageSrc} alt={book.title} className="h-44 w-full object-cover saturate-125" />
+      <img src={imageSrc} alt={book.title} className="h-40 w-full object-cover saturate-125 sm:h-44" />
       <div className="space-y-3 p-4">
         <div>
           <h3 className="ui-title line-clamp-1 text-lg font-semibold">{book.title}</h3>
@@ -28,18 +28,18 @@ const BookCard = ({ book, onIssue, onReserve, isAdmin, onDelete, onEdit }) => {
           <span>{book.genre}</span>
           <span>{book.availableCopies} available</span>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {book.availability ? (
             <button
               onClick={() => onIssue(book._id)}
-              className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-lime-300 px-3 py-2 text-sm font-semibold text-slate-900"
+              className="flex min-w-[130px] flex-1 items-center justify-center gap-2 rounded-lg bg-lime-300 px-3 py-2 text-sm font-semibold text-slate-900"
             >
               <BookUp2 size={14} /> Borrow
             </button>
           ) : (
             <button
               onClick={() => onReserve(book._id)}
-              className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-fuchsia-300/40 bg-fuchsia-500/20 px-3 py-2 text-sm text-white"
+              className="flex min-w-[130px] flex-1 items-center justify-center gap-2 rounded-lg border border-fuchsia-300/40 bg-fuchsia-500/20 px-3 py-2 text-sm text-white"
             >
               <BookmarkPlus size={14} /> Reserve
             </button>

@@ -106,3 +106,20 @@ body {
   border-radius: 9999px;
   padding: 0.55rem 1rem;
 }
+
+@media (max-width: 380px) {
+  .ui-panel {
+    border-radius: 1rem;
+  }
+
+  .ui-input {
+    padding: 0.5rem 0.7rem;
+    font-size: 14px;
+  }
+
+  .ui-btn-primary,
+  .ui-btn-secondary {
+    padding: 0.45rem 0.8rem;
+    font-size: 13px;
+  }
+}

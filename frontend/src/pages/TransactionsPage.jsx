@@ -107,7 +107,7 @@ const TransactionsPage = () => {
 
   return (
     <section className="space-y-4">
-      <h2 className="ui-title text-3xl font-semibold">Transactions</h2>
+      <h2 className="ui-title text-2xl font-semibold sm:text-3xl">Transactions</h2>
       {message && (
         <div className="ui-panel p-3 text-sm text-emerald-300">
           {message}
@@ -122,38 +122,114 @@ const TransactionsPage = () => {
           className="ui-input w-full"
         />
       </div>
-      <div className="ui-panel overflow-x-auto">
-        <table className="w-full text-left text-sm">
+      <div className="space-y-3 md:hidden">
+        {filteredItems.map((tx) => (
+          <article key={tx._id} className="ui-panel space-y-2 p-3">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="ui-title text-sm font-semibold">{tx.bookId?.title || tx.bookId}</p>
+                <p className="text-xs text-slate-300">{tx.userId?.name || tx.userId?.email || "Unknown"}</p>
+                {tx.userId?.email && <p className="text-[11px] text-slate-500">{tx.userId.email}</p>}
+              </div>
+              <span className="rounded-full border border-white/15 px-2 py-1 text-[11px] capitalize text-cyan-300">{tx.status}</span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <p className="text-slate-400">Issue</p>
+                <p>{new Date(tx.issueDate).toLocaleDateString()}</p>
+              </div>
+              <div>
+                <p className="text-slate-400">Due</p>
+                <p>{new Date(tx.dueDate).toLocaleDateString()}</p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-slate-400">Fine</p>
+                <p className="text-sm text-lime-300">INR {calculateFinePreview(tx, returnDates[tx._id])}</p>
+              </div>
+            </div>
+
+            {tx.status !== "returned" ? (
+              <div className="space-y-2">
+                <input
+                  type="date"
+                  value={returnDates[tx._id] || ""}
+                  min={new Date(tx.issueDate).toISOString().split("T")[0]}
+                  onChange={(e) =>
+                    setReturnDates((prev) => ({
+                      ...prev,
+                      [tx._id]: e.target.value,
+                    }))
+                  }
+                  className="ui-input w-full"
+                />
+
+                {canReturn(tx) ? (
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => sendReturnEmail(tx._id)}
+                      disabled={!returnDates[tx._id]}
+                      className="ui-btn-secondary text-xs disabled:opacity-40"
+                    >
+                      Send Email
+                    </button>
+                    <button
+                      onClick={() => returnBook(tx._id)}
+                      disabled={!returnDates[tx._id]}
+                      className="ui-btn-primary text-xs disabled:opacity-40"
+                    >
+                      Return
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-500">Admin only</p>
+                )}
+              </div>
+            ) : (
+              <p className="text-xs text-slate-500">Closed</p>
+            )}
+          </article>
+        ))}
+
+        {filteredItems.length === 0 && (
+          <div className="ui-panel p-4 text-center text-sm text-slate-400">
+            No students matched your search.
+          </div>
+        )}
+      </div>
+
+      <div className="hidden md:block ui-panel overflow-x-auto">
+        <table className="min-w-[680px] w-full text-left text-xs sm:min-w-[760px] sm:text-sm">
           <thead className="bg-black/10 text-slate-300">
             <tr>
-              <th className="p-3">Member</th>
-              <th className="p-3">Book</th>
-              <th className="p-3">Issue Date</th>
-              <th className="p-3">Due Date</th>
-              <th className="p-3">Status</th>
-              <th className="p-3">Fine</th>
-              <th className="p-3">Action</th>
+              <th className="p-2 sm:p-3">Member</th>
+              <th className="p-2 sm:p-3">Book</th>
+              <th className="p-2 sm:p-3">Issue Date</th>
+              <th className="p-2 sm:p-3">Due Date</th>
+              <th className="p-2 sm:p-3">Status</th>
+              <th className="p-2 sm:p-3">Fine</th>
+              <th className="p-2 sm:p-3">Action</th>
             </tr>
           </thead>
           <tbody>
             {filteredItems.map((tx) => (
               <tr key={tx._id} className="border-t border-white/15">
-                <td className="p-3">
+                <td className="p-2 sm:p-3">
                   <div className="text-sm text-slate-300">{tx.userId?.name || tx.userId?.email || "Unknown"}</div>
                   {tx.userId?.email && (
                     <div className="text-xs text-slate-500">{tx.userId.email}</div>
                   )}
                 </td>
-                <td className="p-3">{tx.bookId?.title || tx.bookId}</td>
-                <td className="p-3">{new Date(tx.issueDate).toLocaleDateString()}</td>
-                <td className="p-3">{new Date(tx.dueDate).toLocaleDateString()}</td>
-                <td className="p-3 capitalize">{tx.status}</td>
-                <td className="p-3">
+                <td className="p-2 sm:p-3">{tx.bookId?.title || tx.bookId}</td>
+                <td className="p-2 sm:p-3">{new Date(tx.issueDate).toLocaleDateString()}</td>
+                <td className="p-2 sm:p-3">{new Date(tx.dueDate).toLocaleDateString()}</td>
+                <td className="p-2 sm:p-3 capitalize">{tx.status}</td>
+                <td className="p-2 sm:p-3">
                   INR {calculateFinePreview(tx, returnDates[tx._id])}
                 </td>
-                <td className="p-3">
+                <td className="p-2 sm:p-3">
                   {tx.status !== "returned" ? (
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
                       <input
                         type="date"
                         value={returnDates[tx._id] || ""}
@@ -164,21 +240,21 @@ const TransactionsPage = () => {
                             [tx._id]: e.target.value,
                           }))
                         }
-                        className="ui-input"
+                        className="ui-input w-full sm:w-auto"
                       />
                       {canReturn(tx) ? (
                         <>
                           <button
                             onClick={() => sendReturnEmail(tx._id)}
                             disabled={!returnDates[tx._id]}
-                            className="ui-btn-secondary disabled:opacity-40"
+                            className="ui-btn-secondary text-xs disabled:opacity-40 sm:text-sm"
                           >
                             Send Email
                           </button>
                           <button
                             onClick={() => returnBook(tx._id)}
                             disabled={!returnDates[tx._id]}
-                            className="ui-btn-primary disabled:opacity-40"
+                            className="ui-btn-primary text-xs disabled:opacity-40 sm:text-sm"
                           >
                             Return
                           </button>

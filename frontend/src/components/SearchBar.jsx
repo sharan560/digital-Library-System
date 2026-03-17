@@ -5,18 +5,18 @@ const SearchBar = ({ filters, setFilters, meta, totalResults, onReset, activeFil
 
   return (
     <section className="ui-panel relative z-40 space-y-4 p-4 md:p-5">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between lg:items-center">
         <div>
           <p className="mb-1 flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-cyan-400">
             <Sparkles size={14} /> Discovery Search
           </p>
-          <p className="ui-muted text-sm">{totalResults} matching books with live suggestions, filters, and smart sorting.</p>
+          <p className="ui-muted text-xs sm:text-sm">{totalResults} matching books with live suggestions, filters, and smart sorting.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="rounded-full border border-white/10 px-3 py-2 text-xs text-cyan-300">
+        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+          <span className="rounded-full border border-white/10 px-2.5 py-1 text-[11px] text-cyan-300 sm:px-3 sm:py-2 sm:text-xs">
             {activeFilterCount} active filters
           </span>
-          <button type="button" onClick={onReset} className="ui-btn-secondary inline-flex items-center gap-2">
+          <button type="button" onClick={onReset} className="ui-btn-secondary inline-flex items-center gap-2 px-2.5 py-1 text-[11px] sm:px-4 sm:py-2 sm:text-sm">
             <X size={14} /> Reset
           </button>
         </div>

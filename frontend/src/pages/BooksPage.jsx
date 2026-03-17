@@ -179,8 +179,8 @@ const BooksPage = () => {
   return (
     <section className="space-y-5">
       <div>
-        <p className="text-sm uppercase tracking-[0.2em] text-cyan-400">Catalog</p>
-        <h2 className="ui-title text-3xl font-semibold">Browse Collection</h2>
+        <p className="text-xs uppercase tracking-[0.2em] text-cyan-400 sm:text-sm">Catalog</p>
+        <h2 className="ui-title text-2xl font-semibold sm:text-3xl">Browse Collection</h2>
       </div>
       <SearchBar
         filters={filters}
@@ -218,9 +218,9 @@ const BooksPage = () => {
           <BookCard key={book._id} book={book} onIssue={onIssue} onReserve={onReserve} onDelete={onDelete} onEdit={onEdit} isAdmin={user?.role === "admin"} />
         ))}
       </div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="ui-btn-secondary disabled:opacity-40">Prev</button>
-        <span>{meta.total || 0} results · Page {page} / {meta.totalPages || 1}</span>
+        <span className="text-xs sm:text-sm">{meta.total || 0} results · Page {page} / {meta.totalPages || 1}</span>
         <button disabled={page >= (meta.totalPages || 1)} onClick={() => setPage((p) => p + 1)} className="ui-btn-secondary disabled:opacity-40">Next</button>
       </div>
     </section>

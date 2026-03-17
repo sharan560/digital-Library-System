@@ -21,8 +21,8 @@ const MemberDashboardPage = () => {
   return (
     <section className="space-y-6">
       <div>
-        <p className="text-sm uppercase tracking-[0.2em] text-cyan-400">Member Zone</p>
-        <h2 className="ui-title text-3xl font-semibold">My Library Snapshot</h2>
+        <p className="text-xs uppercase tracking-[0.2em] text-cyan-400 sm:text-sm">Member Zone</p>
+        <h2 className="ui-title text-2xl font-semibold sm:text-3xl">My Library Snapshot</h2>
       </div>
       <div className="grid gap-4 md:grid-cols-3">
         <StatCard title="Active Borrows" value={stats.active} />

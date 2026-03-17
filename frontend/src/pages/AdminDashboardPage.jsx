@@ -17,8 +17,8 @@ const AdminDashboardPage = () => {
   return (
     <section className="space-y-6">
       <div>
-        <p className="text-sm uppercase tracking-[0.2em] text-cyan-400">Admin Center</p>
-        <h2 className="ui-title text-3xl font-semibold">Library Analytics</h2>
+        <p className="text-xs uppercase tracking-[0.2em] text-cyan-400 sm:text-sm">Admin Center</p>
+        <h2 className="ui-title text-2xl font-semibold sm:text-3xl">Library Analytics</h2>
       </div>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <StatCard title="Total Books" value={data.totalBooks} />
@@ -33,7 +33,7 @@ const AdminDashboardPage = () => {
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
-                <XAxis dataKey="month" stroke="#94a3b8" tick={{ fontSize: 12 }} />
+                <XAxis dataKey="month" stroke="#94a3b8" tick={{ fontSize: 10 }} />
                 <YAxis stroke="#94a3b8" />
                 <Tooltip />
                 <Bar dataKey="issues" fill="#d9f31e" radius={[8, 8, 0, 0]} />
