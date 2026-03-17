@@ -2,8 +2,12 @@ import { motion } from "framer-motion";
 import { BookUp2, BookmarkPlus, LibraryBig } from "lucide-react";
 
 const BookCard = ({ book, onIssue, onReserve, isAdmin, onDelete, onEdit }) => {
+  const apiHost = import.meta.env.VITE_API_BASE_URL?.replace("/api", "") || "http://localhost:5000";
+  const isExternalImage = /^https?:\/\//i.test(book.coverImage || "");
   const imageSrc = book.coverImage
-    ? `${import.meta.env.VITE_API_BASE_URL?.replace("/api", "") || "http://localhost:5000"}${book.coverImage}`
+    ? isExternalImage
+      ? book.coverImage
+      : `${apiHost}${book.coverImage}`
     : "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&auto=format&fit=crop";
 
   return (

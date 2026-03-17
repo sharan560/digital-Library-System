@@ -13,7 +13,6 @@ const SignupPage = () => {
     email: "",
     password: "",
     emailNotificationsOptIn: true,
-    role: "member",
   });
   const [error, setError] = useState("");
 
@@ -34,7 +33,7 @@ const SignupPage = () => {
       onToggleTheme={toggleTheme}
       eyebrow="Create Access"
       title="Start your library workspace"
-      description="Set up a member or librarian account and move directly into catalog browsing, reservations, and operational dashboards."
+      description="Create your member account and move directly into catalog browsing, reservations, and your library dashboard."
       altText="Already registered?"
       altLinkText="Sign in"
       altLinkTo="/login"
@@ -73,18 +72,6 @@ const SignupPage = () => {
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
             />
-          </div>
-
-          <div className="space-y-2">
-            <label className="ui-title text-sm font-medium">Role</label>
-            <select
-              className="ui-input w-full"
-              value={form.role}
-              onChange={(e) => setForm({ ...form, role: e.target.value })}
-            >
-              <option value="member">Member</option>
-              <option value="admin">Admin</option>
-            </select>
           </div>
         </div>
 

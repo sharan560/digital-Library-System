@@ -15,7 +15,7 @@ const signup = asyncHandler(async (req, res) => {
     throw new Error(errors.array()[0].msg);
   }
 
-  const { name, email, password, role, emailNotificationsOptIn } = req.body;
+  const { name, email, password, emailNotificationsOptIn } = req.body;
   const exists = await User.findOne({ email });
 
   if (exists) {
@@ -28,7 +28,7 @@ const signup = asyncHandler(async (req, res) => {
     email,
     password,
     emailNotificationsOptIn: emailNotificationsOptIn !== false,
-    role: role === "admin" ? "admin" : "member",
+    role: "member",
   });
 
   res.status(201).json({

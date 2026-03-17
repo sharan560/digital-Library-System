@@ -4,7 +4,7 @@ const SearchBar = ({ filters, setFilters, meta, totalResults, onReset, activeFil
   const update = (key, value) => setFilters((prev) => ({ ...prev, [key]: value }));
 
   return (
-    <section className="ui-panel space-y-4 p-4 md:p-5">
+    <section className="ui-panel relative z-40 space-y-4 p-4 md:p-5">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <p className="mb-1 flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-cyan-400">
@@ -23,16 +23,20 @@ const SearchBar = ({ filters, setFilters, meta, totalResults, onReset, activeFil
       </div>
 
       <div className="grid gap-3 lg:grid-cols-[1.5fr_repeat(4,minmax(0,1fr))]">
-        <div className="relative">
-          <Search size={16} className="pointer-events-none absolute left-4 top-3.5 text-cyan-400" />
+        <div className="relative z-50">
+          <Search
+            size={16}
+            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400/80"
+          />
           <input
             placeholder="Search title, author, ISBN, genre..."
             value={filters.q}
             onChange={(e) => update("q", e.target.value)}
-            className="ui-input w-full pl-11"
+            className="ui-input h-12 w-full placeholder:text-slate-400"
+            style={{ paddingLeft: "2.75rem", paddingRight: "1rem" }}
           />
           {filters.q && meta?.suggestions?.length > 0 && (
-            <div className="absolute z-10 mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/95 p-2 shadow-2xl backdrop-blur">
+            <div className="absolute z-[100] mt-2 max-h-72 w-full overflow-y-auto rounded-2xl border border-white/10 bg-slate-950/95 p-2 shadow-2xl backdrop-blur">
               {meta.suggestions.map((item) => (
                 <button
                   key={item._id}

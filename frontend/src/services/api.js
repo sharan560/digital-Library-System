@@ -30,6 +30,8 @@ export const booksApi = {
 export const transactionsApi = {
   list: () => api.get("/transactions"),
   issue: (bookId) => api.post("/transactions/issue", { bookId }),
+  sendReturnEmail: (id, returnDate) =>
+    api.post(`/transactions/${id}/send-return-email`, { returnDate }),
   returnBook: (id, returnDate) => api.put(`/transactions/${id}/return`, { returnDate }),
 };
 

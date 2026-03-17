@@ -12,7 +12,7 @@ const AdminDashboardPage = () => {
 
   if (!data) return <p>Loading dashboard...</p>;
 
-  const chartData = data.monthlyIssues.map((m) => ({ month: `M${m._id}`, issues: m.issues }));
+  const chartData = data.monthlyIssues.map((m) => ({ month: m.label, issues: m.issues }));
 
   return (
     <section className="space-y-6">
@@ -33,7 +33,7 @@ const AdminDashboardPage = () => {
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
-                <XAxis dataKey="month" stroke="#94a3b8" />
+                <XAxis dataKey="month" stroke="#94a3b8" tick={{ fontSize: 12 }} />
                 <YAxis stroke="#94a3b8" />
                 <Tooltip />
                 <Bar dataKey="issues" fill="#d9f31e" radius={[8, 8, 0, 0]} />
