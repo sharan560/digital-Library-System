@@ -8,6 +8,8 @@ const transactionSchema = new mongoose.Schema(
     dueDate: { type: Date, required: true },
     returnDate: { type: Date },
     fine: { type: Number, default: 0 },
+    lastFineNotifiedAt: { type: Date },
+    fineNotificationCount: { type: Number, default: 0 },
     status: {
       type: String,
       enum: ["issued", "returned", "overdue"],

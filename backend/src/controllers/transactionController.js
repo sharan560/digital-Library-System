@@ -2,16 +2,8 @@ const Transaction = require("../models/Transaction");
 const Book = require("../models/Book");
 const Reservation = require("../models/Reservation");
 const asyncHandler = require("../utils/asyncHandler");
-
-const DAILY_FINE = Number(process.env.DAILY_FINE || 10);
+const { calculateFine } = require("../utils/fine");
 const BORROW_DAYS = Number(process.env.BORROW_DAYS || 14);
-
-const calculateFine = (dueDate) => {
-  const now = new Date();
-  if (now <= dueDate) return 0;
-  const lateDays = Math.ceil((now - dueDate) / (1000 * 60 * 60 * 24));
-  return lateDays * DAILY_FINE;
-};
 
 const issueBook = asyncHandler(async (req, res) => {
   const book = await Book.findById(req.body.bookId || req.params.bookId);
@@ -61,8 +53,25 @@ const returnBook = asyncHandler(async (req, res) => {
     throw new Error("Cannot return transaction for another user");
   }
 
-  tx.returnDate = new Date();
-  tx.fine = calculateFine(tx.dueDate);
+  const providedReturnDate = req.body.returnDate;
+  let effectiveReturnDate = new Date();
+
+  if (providedReturnDate) {
+    const parsedDate = new Date(providedReturnDate);
+    if (Number.isNaN(parsedDate.getTime())) {
+      res.status(400);
+      throw new Error("Invalid return date format");
+    }
+    effectiveReturnDate = parsedDate;
+  }
+
+  if (effectiveReturnDate < tx.issueDate) {
+    res.status(400);
+    throw new Error("Return date cannot be before issue date");
+  }
+
+  tx.returnDate = effectiveReturnDate;
+  tx.fine = calculateFine(tx.dueDate, effectiveReturnDate);
   tx.status = "returned";
   await tx.save();
 

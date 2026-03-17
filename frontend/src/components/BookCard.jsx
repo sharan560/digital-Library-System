@@ -11,16 +11,16 @@ const BookCard = ({ book, onIssue, onReserve, isAdmin, onDelete, onEdit }) => {
       layout
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="overflow-hidden rounded-2xl border border-white/10 bg-slate-900/90 shadow-xl"
+      className="ui-panel overflow-hidden shadow-xl"
     >
-      <img src={imageSrc} alt={book.title} className="h-44 w-full object-cover" />
+      <img src={imageSrc} alt={book.title} className="h-44 w-full object-cover saturate-125" />
       <div className="space-y-3 p-4">
         <div>
-          <h3 className="line-clamp-1 text-lg font-semibold text-slate-100">{book.title}</h3>
-          <p className="text-sm text-slate-400">{book.author}</p>
+          <h3 className="ui-title line-clamp-1 text-lg font-semibold">{book.title}</h3>
+          <p className="ui-muted text-sm">{book.author}</p>
         </div>
-        <p className="line-clamp-2 text-sm text-slate-300">{book.description}</p>
-        <div className="flex items-center justify-between text-xs text-slate-400">
+        <p className="ui-muted line-clamp-2 text-sm">{book.description}</p>
+        <div className="ui-muted flex items-center justify-between text-xs">
           <span>{book.genre}</span>
           <span>{book.availableCopies} available</span>
         </div>
@@ -28,14 +28,14 @@ const BookCard = ({ book, onIssue, onReserve, isAdmin, onDelete, onEdit }) => {
           {book.availability ? (
             <button
               onClick={() => onIssue(book._id)}
-              className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-amber-400 px-3 py-2 text-sm font-medium text-slate-950"
+              className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-lime-300 px-3 py-2 text-sm font-semibold text-slate-900"
             >
               <BookUp2 size={14} /> Borrow
             </button>
           ) : (
             <button
               onClick={() => onReserve(book._id)}
-              className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-slate-700 px-3 py-2 text-sm text-slate-100"
+              className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-fuchsia-300/40 bg-fuchsia-500/20 px-3 py-2 text-sm text-white"
             >
               <BookmarkPlus size={14} /> Reserve
             </button>
@@ -44,7 +44,7 @@ const BookCard = ({ book, onIssue, onReserve, isAdmin, onDelete, onEdit }) => {
             <>
               <button
                 onClick={() => onEdit(book)}
-                className="rounded-lg border border-sky-500/50 px-3 py-2 text-sm text-sky-300"
+                className="rounded-lg border border-cyan-400/40 px-3 py-2 text-sm text-cyan-300"
               >
                 Edit
               </button>
@@ -57,7 +57,7 @@ const BookCard = ({ book, onIssue, onReserve, isAdmin, onDelete, onEdit }) => {
             </>
           )}
           {!isAdmin && (
-            <div className="grid place-items-center rounded-lg border border-white/10 px-3 py-2 text-slate-300">
+            <div className="grid place-items-center rounded-lg border border-white/20 px-3 py-2 text-slate-200">
               <LibraryBig size={14} />
             </div>
           )}

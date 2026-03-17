@@ -6,17 +6,17 @@ const userSchema = new mongoose.Schema(
     name: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true, minlength: 6 },
+    emailNotificationsOptIn: { type: Boolean, default: true },
     role: { type: String, enum: ["admin", "member"], default: "member" },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
 
-userSchema.pre("save", async function preSave(next) {
-  if (!this.isModified("password")) return next();
+userSchema.pre("save", async function preSave() {
+  if (!this.isModified("password")) return;
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-  return next();
 });
 
 userSchema.methods.comparePassword = function comparePassword(candidatePassword) {

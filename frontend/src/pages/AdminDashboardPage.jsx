@@ -17,8 +17,8 @@ const AdminDashboardPage = () => {
   return (
     <section className="space-y-6">
       <div>
-        <p className="text-sm uppercase tracking-[0.2em] text-amber-400">Admin Center</p>
-        <h2 className="text-3xl font-semibold">Library Analytics</h2>
+        <p className="text-sm uppercase tracking-[0.2em] text-cyan-400">Admin Center</p>
+        <h2 className="ui-title text-3xl font-semibold">Library Analytics</h2>
       </div>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <StatCard title="Total Books" value={data.totalBooks} />
@@ -28,27 +28,27 @@ const AdminDashboardPage = () => {
         <StatCard title="Fine Collected" value={`INR ${data.fineCollected}`} />
       </div>
       <div className="grid gap-4 xl:grid-cols-3">
-        <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-4 xl:col-span-2">
-          <p className="mb-3 text-lg">Monthly Issues</p>
+        <div className="ui-panel p-4 xl:col-span-2">
+          <p className="ui-title mb-3 text-lg">Monthly Issues</p>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
                 <XAxis dataKey="month" stroke="#94a3b8" />
                 <YAxis stroke="#94a3b8" />
                 <Tooltip />
-                <Bar dataKey="issues" fill="#f59e0b" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="issues" fill="#d9f31e" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-4">
-          <p className="mb-3 text-lg">Top Borrowed</p>
+        <div className="ui-panel p-4">
+          <p className="ui-title mb-3 text-lg">Top Borrowed</p>
           <div className="space-y-2">
             {data.topBorrowed.map((book) => (
-              <div key={book._id} className="rounded-lg border border-white/10 p-3">
-                <p className="font-medium text-slate-100">{book.title}</p>
-                <p className="text-sm text-slate-400">{book.author}</p>
-                <p className="text-sm text-amber-300">Borrowed {book.borrowCount} times</p>
+              <div key={book._id} className="rounded-lg border border-white/15 p-3">
+                <p className="ui-title font-medium">{book.title}</p>
+                <p className="ui-muted text-sm">{book.author}</p>
+                <p className="text-sm text-lime-300">Borrowed {book.borrowCount} times</p>
               </div>
             ))}
           </div>

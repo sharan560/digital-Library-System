@@ -2,6 +2,7 @@ const express = require("express");
 const { body } = require("express-validator");
 const {
   getBooks,
+  getBookSearchMeta,
   getBookById,
   createBook,
   updateBook,
@@ -13,6 +14,7 @@ const upload = require("../middleware/uploadMiddleware");
 const router = express.Router();
 
 router.get("/", getBooks);
+router.get("/search/meta", getBookSearchMeta);
 router.get("/:id", getBookById);
 
 router.post(

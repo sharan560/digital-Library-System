@@ -4,6 +4,7 @@ import { useAuth } from "./context/AuthContext";
 import AppLayout from "./layouts/AppLayout";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import BooksPage from "./pages/BooksPage";
+import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import MemberDashboardPage from "./pages/MemberDashboardPage";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -18,7 +19,7 @@ function App() {
     <Routes>
       <Route
         path="/"
-        element={<Navigate to={user ? (user.role === "admin" ? "/admin" : "/member") : "/login"} replace />}
+        element={<LandingPage />}
       />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />

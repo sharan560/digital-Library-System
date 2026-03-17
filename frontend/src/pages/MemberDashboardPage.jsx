@@ -21,8 +21,8 @@ const MemberDashboardPage = () => {
   return (
     <section className="space-y-6">
       <div>
-        <p className="text-sm uppercase tracking-[0.2em] text-amber-400">Member Zone</p>
-        <h2 className="text-3xl font-semibold">My Library Snapshot</h2>
+        <p className="text-sm uppercase tracking-[0.2em] text-cyan-400">Member Zone</p>
+        <h2 className="ui-title text-3xl font-semibold">My Library Snapshot</h2>
       </div>
       <div className="grid gap-4 md:grid-cols-3">
         <StatCard title="Active Borrows" value={stats.active} />
@@ -30,26 +30,26 @@ const MemberDashboardPage = () => {
         <StatCard title="Total Fine" value={`INR ${stats.fines}`} />
       </div>
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-4">
-          <p className="mb-3 text-lg">Issued Books</p>
+        <div className="ui-panel p-4">
+          <p className="ui-title mb-3 text-lg">Issued Books</p>
           <div className="space-y-2">
             {transactions.slice(0, 6).map((tx) => (
-              <div key={tx._id} className="rounded-lg border border-white/10 p-3 text-sm">
-                <p className="text-slate-100">{tx.bookId?.title || "Book"}</p>
-                <p className="text-slate-400">Due: {new Date(tx.dueDate).toLocaleDateString()}</p>
-                <p className="text-amber-300">Status: {tx.status}</p>
+              <div key={tx._id} className="rounded-lg border border-white/15 p-3 text-sm">
+                <p className="ui-title">{tx.bookId?.title || "Book"}</p>
+                <p className="ui-muted">Due: {new Date(tx.dueDate).toLocaleDateString()}</p>
+                <p className="text-cyan-300">Status: {tx.status}</p>
               </div>
             ))}
           </div>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-4">
-          <p className="mb-3 text-lg">Reservations</p>
+        <div className="ui-panel p-4">
+          <p className="ui-title mb-3 text-lg">Reservations</p>
           <div className="space-y-2">
             {reservations.slice(0, 6).map((r) => (
-              <div key={r._id} className="rounded-lg border border-white/10 p-3 text-sm">
-                <p className="text-slate-100">{r.bookId?.title || "Book"}</p>
-                <p className="text-slate-400">Queue: {r.queuePosition}</p>
-                <p className="text-amber-300">{r.status}</p>
+              <div key={r._id} className="rounded-lg border border-white/15 p-3 text-sm">
+                <p className="ui-title">{r.bookId?.title || "Book"}</p>
+                <p className="ui-muted">Queue: {r.queuePosition}</p>
+                <p className="text-fuchsia-300">{r.status}</p>
               </div>
             ))}
           </div>

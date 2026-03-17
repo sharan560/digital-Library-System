@@ -13,6 +13,10 @@ router.post(
     body("password")
       .isLength({ min: 6 })
       .withMessage("Password must be at least 6 characters"),
+    body("emailNotificationsOptIn")
+      .optional()
+      .isBoolean()
+      .withMessage("emailNotificationsOptIn must be true or false"),
   ],
   signup
 );

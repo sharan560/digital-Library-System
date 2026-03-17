@@ -15,10 +15,11 @@ const Sidebar = ({ role, onLogout, dark, onToggleTheme }) => {
   const navItems = role === "admin" ? [...admin, ...common] : [...member, ...common];
 
   return (
-    <aside className="sticky top-0 h-screen w-full max-w-72 border-r border-white/10 bg-slate-950/80 p-4 backdrop-blur">
+    <aside className="sticky top-0 h-screen w-full max-w-72 p-4 md:p-5">
+      <div className="ui-panel h-full p-4">
       <div className="mb-8">
-        <p className="text-sm uppercase tracking-[0.25em] text-amber-400">Digital Library</p>
-        <h1 className="text-2xl font-semibold text-slate-100">StackShelf</h1>
+        <p className="text-xs uppercase tracking-[0.35em] text-cyan-400">Digital Library</p>
+        <h1 className="ui-title text-2xl font-semibold">StackShelf</h1>
       </div>
       <nav className="space-y-2">
         {navItems.map(({ to, label, icon: Icon }) => (
@@ -28,8 +29,10 @@ const Sidebar = ({ role, onLogout, dark, onToggleTheme }) => {
             className={({ isActive }) =>
               `flex items-center gap-3 rounded-xl px-4 py-3 transition ${
                 isActive
-                  ? "bg-amber-500 text-slate-950"
-                  : "text-slate-300 hover:bg-white/10 hover:text-white"
+                  ? "bg-lime-300 text-slate-900"
+                  : dark
+                    ? "text-slate-200 hover:bg-white/10 hover:text-white"
+                    : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
               }`
             }
           >
@@ -39,16 +42,17 @@ const Sidebar = ({ role, onLogout, dark, onToggleTheme }) => {
         ))}
       </nav>
       <div className="mt-6 flex items-center justify-between">
-        <span className="text-sm text-slate-400">Theme</span>
+        <span className="ui-muted text-sm">Theme</span>
         <ThemeToggle dark={dark} onToggle={onToggleTheme} />
       </div>
       <button
         onClick={onLogout}
-        className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl border border-red-400/30 px-4 py-3 text-red-300 hover:bg-red-500/10"
+        className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl border border-rose-500/30 px-4 py-3 text-rose-300 hover:bg-rose-500/10"
       >
         <LogOut size={16} />
         Logout
       </button>
+      </div>
     </aside>
   );
 };

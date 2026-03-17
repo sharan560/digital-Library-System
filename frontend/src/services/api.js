@@ -20,6 +20,7 @@ export const authApi = {
 
 export const booksApi = {
   list: (params) => api.get("/books", { params }),
+  searchMeta: (params) => api.get("/books/search/meta", { params }),
   create: (payload) => api.post("/books", payload, { headers: { "Content-Type": "multipart/form-data" } }),
   update: (id, payload) =>
     api.put(`/books/${id}`, payload, { headers: { "Content-Type": "multipart/form-data" } }),
@@ -29,7 +30,7 @@ export const booksApi = {
 export const transactionsApi = {
   list: () => api.get("/transactions"),
   issue: (bookId) => api.post("/transactions/issue", { bookId }),
-  returnBook: (id) => api.put(`/transactions/${id}/return`),
+  returnBook: (id, returnDate) => api.put(`/transactions/${id}/return`, { returnDate }),
 };
 
 export const reservationsApi = {

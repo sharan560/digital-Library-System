@@ -2,29 +2,45 @@ const { validationResult } = require("express-validator");
 const Book = require("../models/Book");
 const asyncHandler = require("../utils/asyncHandler");
 
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const buildBookFilter = ({ q, genre, author, availability }) => {
+  const filter = {};
+  const trimmedQuery = q?.trim();
+
+  if (trimmedQuery) {
+    const safeQuery = escapeRegex(trimmedQuery);
+    filter.$or = [
+      { title: { $regex: safeQuery, $options: "i" } },
+      { author: { $regex: safeQuery, $options: "i" } },
+      { genre: { $regex: safeQuery, $options: "i" } },
+      { description: { $regex: safeQuery, $options: "i" } },
+      { isbn: { $regex: safeQuery, $options: "i" } },
+    ];
+  }
+
+  if (genre) {
+    filter.genre = { $regex: `^${escapeRegex(genre)}$`, $options: "i" };
+  }
+
+  if (author) {
+    filter.author = { $regex: escapeRegex(author), $options: "i" };
+  }
+
+  if (availability !== undefined && availability !== "") {
+    filter.availability = availability === "true";
+  }
+
+  return filter;
+};
+
 const getBooks = asyncHandler(async (req, res) => {
   const page = Number(req.query.page || 1);
   const limit = Number(req.query.limit || 8);
   const skip = (page - 1) * limit;
 
   const { q, genre, author, availability, sort = "latest" } = req.query;
-  const filter = {};
-
-  if (q) {
-    filter.$text = { $search: q };
-  }
-
-  if (genre) {
-    filter.genre = genre;
-  }
-
-  if (author) {
-    filter.author = { $regex: author, $options: "i" };
-  }
-
-  if (availability !== undefined) {
-    filter.availability = availability === "true";
-  }
+  const filter = buildBookFilter({ q, genre, author, availability });
 
   const sortMap = {
     popularity: { borrowCount: -1 },
@@ -32,9 +48,8 @@ const getBooks = asyncHandler(async (req, res) => {
     alphabetical: { title: 1 },
   };
 
-  const projection = q ? { score: { $meta: "textScore" } } : {};
-  const query = Book.find(filter, projection)
-    .sort(q ? { score: { $meta: "textScore" } } : sortMap[sort] || sortMap.latest)
+  const query = Book.find(filter)
+    .sort(sortMap[sort] || sortMap.latest)
     .skip(skip)
     .limit(limit);
 
@@ -48,6 +63,45 @@ const getBooks = asyncHandler(async (req, res) => {
       limit,
       total,
       totalPages: Math.ceil(total / limit),
+    },
+  });
+});
+
+const getBookSearchMeta = asyncHandler(async (req, res) => {
+  const q = req.query.q?.trim() || "";
+  const safeQuery = q ? escapeRegex(q) : null;
+
+  const [genres, authors, suggestions] = await Promise.all([
+    Book.aggregate([
+      { $group: { _id: "$genre", count: { $sum: 1 } } },
+      { $sort: { count: -1, _id: 1 } },
+      { $limit: 8 },
+    ]),
+    Book.aggregate([
+      { $group: { _id: "$author", count: { $sum: 1 } } },
+      { $sort: { count: -1, _id: 1 } },
+      { $limit: 8 },
+    ]),
+    q
+      ? Book.find({
+          $or: [
+            { title: { $regex: safeQuery, $options: "i" } },
+            { author: { $regex: safeQuery, $options: "i" } },
+            { genre: { $regex: safeQuery, $options: "i" } },
+          ],
+        })
+          .select("title author genre availability")
+          .sort({ borrowCount: -1, createdAt: -1 })
+          .limit(6)
+      : Promise.resolve([]),
+  ]);
+
+  res.json({
+    success: true,
+    data: {
+      genres: genres.map((item) => item._id).filter(Boolean),
+      authors: authors.map((item) => item._id).filter(Boolean),
+      suggestions,
     },
   });
 });
@@ -126,6 +180,7 @@ const deleteBook = asyncHandler(async (req, res) => {
 
 module.exports = {
   getBooks,
+  getBookSearchMeta,
   getBookById,
   createBook,
   updateBook,

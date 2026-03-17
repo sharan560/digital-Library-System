@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
+import AuthShell from "../components/AuthShell";
 
 const LoginPage = () => {
   const { login } = useAuth();
+  const { dark, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
@@ -20,31 +23,44 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="grid min-h-screen place-items-center bg-[radial-gradient(circle_at_top,_#f59e0b22,_#020617)] p-4">
-      <form onSubmit={onSubmit} className="w-full max-w-md space-y-4 rounded-2xl border border-white/10 bg-slate-950/70 p-8 backdrop-blur">
-        <h1 className="text-3xl font-semibold text-amber-300">Welcome Back</h1>
-        <p className="text-sm text-slate-400">Sign in to your Digital Library workspace</p>
-        {error && <p className="rounded bg-red-500/10 p-2 text-sm text-red-300">{error}</p>}
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-        />
-        <button className="w-full rounded-lg bg-amber-400 py-2 font-semibold text-slate-950">Login</button>
-        <p className="text-sm text-slate-300">
-          New here? <Link className="text-amber-300" to="/signup">Create account</Link>
-        </p>
+    <AuthShell
+      dark={dark}
+      onToggleTheme={toggleTheme}
+      eyebrow="Welcome Back"
+      title="Sign in to continue"
+      description="Access member activity, librarian dashboards, issued books, and live reservation flows from one secure workspace."
+      altText="New to StackShelf?"
+      altLinkText="Create an account"
+      altLinkTo="/signup"
+    >
+      <form onSubmit={onSubmit} className="space-y-4">
+        {error && <p className="rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">{error}</p>}
+
+        <div className="space-y-2">
+          <label className="ui-title text-sm font-medium">Email Address</label>
+          <input
+            type="email"
+            placeholder="name@example.com"
+            className="ui-input w-full"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="ui-title text-sm font-medium">Password</label>
+          <input
+            type="password"
+            placeholder="Enter your password"
+            className="ui-input w-full"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+          />
+        </div>
+
+        <button className="ui-btn-primary w-full justify-center py-3 text-center">Login</button>
       </form>
-    </div>
+    </AuthShell>
   );
 };
 

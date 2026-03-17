@@ -3,6 +3,7 @@ import BookCard from "../components/BookCard";
 import SearchBar from "../components/SearchBar";
 import { booksApi, reservationsApi, transactionsApi } from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import useDebouncedValue from "../hooks/useDebouncedValue";
 
 const BooksPage = () => {
   const { user } = useAuth();
@@ -20,25 +21,54 @@ const BooksPage = () => {
   });
   const [page, setPage] = useState(1);
   const [meta, setMeta] = useState({ totalPages: 1 });
+  const [searchMeta, setSearchMeta] = useState({ genres: [], authors: [], suggestions: [] });
   const [filters, setFilters] = useState({ q: "", genre: "", author: "", sort: "latest", availability: "" });
+  const [message, setMessage] = useState("");
+  const debouncedQuery = useDebouncedValue(filters.q, 280);
+  const debouncedAuthor = useDebouncedValue(filters.author, 280);
+
+  const activeFilterCount = [filters.q, filters.genre, filters.author, filters.availability].filter(Boolean).length;
 
   const fetchBooks = async () => {
-    const { data } = await booksApi.list({ ...filters, page, limit: 8 });
+    const { data } = await booksApi.list({ ...filters, q: debouncedQuery, author: debouncedAuthor, page, limit: 8 });
     setBooks(data.data);
     setMeta(data.pagination);
   };
 
+  const fetchSearchMeta = async () => {
+    const { data } = await booksApi.searchMeta({ q: debouncedQuery });
+    setSearchMeta(data.data);
+  };
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedQuery, debouncedAuthor, filters.genre, filters.sort, filters.availability]);
+
   useEffect(() => {
     fetchBooks();
-  }, [page, filters.q, filters.genre, filters.author, filters.sort, filters.availability]);
+  }, [page, debouncedQuery, debouncedAuthor, filters.genre, filters.sort, filters.availability]);
+
+  useEffect(() => {
+    fetchSearchMeta();
+  }, [debouncedQuery]);
 
   const onIssue = async (bookId) => {
-    await transactionsApi.issue(bookId);
-    fetchBooks();
+    try {
+      await transactionsApi.issue(bookId);
+      setMessage("Book issued successfully.");
+      fetchBooks();
+    } catch (error) {
+      setMessage(error.response?.data?.message || "Could not issue book.");
+    }
   };
 
   const onReserve = async (bookId) => {
-    await reservationsApi.reserve(bookId);
+    try {
+      await reservationsApi.reserve(bookId);
+      setMessage("Reservation placed successfully.");
+    } catch (error) {
+      setMessage(error.response?.data?.message || "Could not reserve book.");
+    }
   };
 
   const onDelete = async (bookId) => {
@@ -58,6 +88,11 @@ const BooksPage = () => {
       description: "",
       coverImage: null,
     });
+  };
+
+  const resetSearch = () => {
+    setFilters({ q: "", genre: "", author: "", sort: "latest", availability: "" });
+    setMessage("");
   };
 
   const onEdit = (book) => {
@@ -94,24 +129,36 @@ const BooksPage = () => {
   return (
     <section className="space-y-5">
       <div>
-        <p className="text-sm uppercase tracking-[0.2em] text-amber-400">Catalog</p>
-        <h2 className="text-3xl font-semibold">Browse Collection</h2>
+        <p className="text-sm uppercase tracking-[0.2em] text-cyan-400">Catalog</p>
+        <h2 className="ui-title text-3xl font-semibold">Browse Collection</h2>
       </div>
-      <SearchBar filters={filters} setFilters={setFilters} />
+      <SearchBar
+        filters={filters}
+        setFilters={setFilters}
+        meta={searchMeta}
+        totalResults={meta.total || 0}
+        onReset={resetSearch}
+        activeFilterCount={activeFilterCount}
+      />
+      {message && (
+        <div className="ui-panel p-3 text-sm text-emerald-300">
+          {message}
+        </div>
+      )}
       {user?.role === "admin" && (
-        <form onSubmit={submitBook} className="grid gap-3 rounded-2xl border border-white/10 bg-slate-900/70 p-4 md:grid-cols-4">
-          <input className="rounded-lg border border-white/10 bg-slate-950 px-3 py-2" placeholder="Title" value={bookForm.title} onChange={(e) => setBookForm({ ...bookForm, title: e.target.value })} required />
-          <input className="rounded-lg border border-white/10 bg-slate-950 px-3 py-2" placeholder="Author" value={bookForm.author} onChange={(e) => setBookForm({ ...bookForm, author: e.target.value })} required />
-          <input className="rounded-lg border border-white/10 bg-slate-950 px-3 py-2" placeholder="Genre" value={bookForm.genre} onChange={(e) => setBookForm({ ...bookForm, genre: e.target.value })} required />
-          <input className="rounded-lg border border-white/10 bg-slate-950 px-3 py-2" placeholder="ISBN" value={bookForm.isbn} onChange={(e) => setBookForm({ ...bookForm, isbn: e.target.value })} required />
-          <input className="rounded-lg border border-white/10 bg-slate-950 px-3 py-2" placeholder="Total copies" type="number" value={bookForm.totalCopies} onChange={(e) => setBookForm({ ...bookForm, totalCopies: e.target.value })} required />
-          <input className="rounded-lg border border-white/10 bg-slate-950 px-3 py-2" placeholder="Available copies" type="number" value={bookForm.availableCopies} onChange={(e) => setBookForm({ ...bookForm, availableCopies: e.target.value })} required />
-          <input className="rounded-lg border border-white/10 bg-slate-950 px-3 py-2" placeholder="Description" value={bookForm.description} onChange={(e) => setBookForm({ ...bookForm, description: e.target.value })} />
-          <input className="rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm" type="file" accept="image/*" onChange={(e) => setBookForm({ ...bookForm, coverImage: e.target.files?.[0] || null })} />
+        <form onSubmit={submitBook} className="ui-panel grid gap-3 p-4 md:grid-cols-4">
+          <input className="ui-input" placeholder="Title" value={bookForm.title} onChange={(e) => setBookForm({ ...bookForm, title: e.target.value })} required />
+          <input className="ui-input" placeholder="Author" value={bookForm.author} onChange={(e) => setBookForm({ ...bookForm, author: e.target.value })} required />
+          <input className="ui-input" placeholder="Genre" value={bookForm.genre} onChange={(e) => setBookForm({ ...bookForm, genre: e.target.value })} required />
+          <input className="ui-input" placeholder="ISBN" value={bookForm.isbn} onChange={(e) => setBookForm({ ...bookForm, isbn: e.target.value })} required />
+          <input className="ui-input" placeholder="Total copies" type="number" value={bookForm.totalCopies} onChange={(e) => setBookForm({ ...bookForm, totalCopies: e.target.value })} required />
+          <input className="ui-input" placeholder="Available copies" type="number" value={bookForm.availableCopies} onChange={(e) => setBookForm({ ...bookForm, availableCopies: e.target.value })} required />
+          <input className="ui-input" placeholder="Description" value={bookForm.description} onChange={(e) => setBookForm({ ...bookForm, description: e.target.value })} />
+          <input className="ui-input text-sm" type="file" accept="image/*" onChange={(e) => setBookForm({ ...bookForm, coverImage: e.target.files?.[0] || null })} />
           <div className="flex gap-2 md:col-span-4">
-            <button className="rounded-lg bg-amber-400 px-4 py-2 font-semibold text-slate-900">{editingId ? "Update Book" : "Add Book"}</button>
+            <button className="ui-btn-primary">{editingId ? "Update Book" : "Add Book"}</button>
             {editingId && (
-              <button type="button" onClick={resetForm} className="rounded-lg border border-white/20 px-4 py-2">Cancel</button>
+              <button type="button" onClick={resetForm} className="ui-btn-secondary">Cancel</button>
             )}
           </div>
         </form>
@@ -122,9 +169,9 @@ const BooksPage = () => {
         ))}
       </div>
       <div className="flex items-center justify-between">
-        <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="rounded-lg border border-white/20 px-4 py-2 disabled:opacity-40">Prev</button>
-        <span>Page {page} / {meta.totalPages || 1}</span>
-        <button disabled={page >= (meta.totalPages || 1)} onClick={() => setPage((p) => p + 1)} className="rounded-lg border border-white/20 px-4 py-2 disabled:opacity-40">Next</button>
+        <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="ui-btn-secondary disabled:opacity-40">Prev</button>
+        <span>{meta.total || 0} results · Page {page} / {meta.totalPages || 1}</span>
+        <button disabled={page >= (meta.totalPages || 1)} onClick={() => setPage((p) => p + 1)} className="ui-btn-secondary disabled:opacity-40">Next</button>
       </div>
     </section>
   );
