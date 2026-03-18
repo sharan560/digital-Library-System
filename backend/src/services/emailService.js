@@ -10,16 +10,49 @@ const hasEmailConfig = () =>
       process.env.SMTP_FROM
   );
 
+const toBool = (value, fallback = false) => {
+  if (value == null) return fallback;
+  return String(value).toLowerCase() === "true";
+};
+
+const toNumber = (value, fallback) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
 const getTransporter = () =>
   nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT || 587),
-    secure: String(process.env.SMTP_SECURE || "false") === "true",
+    secure: toBool(process.env.SMTP_SECURE, false),
+    requireTLS: toBool(process.env.SMTP_REQUIRE_TLS, false),
+    connectionTimeout: toNumber(process.env.SMTP_CONNECTION_TIMEOUT_MS, 15000),
+    greetingTimeout: toNumber(process.env.SMTP_GREETING_TIMEOUT_MS, 12000),
+    socketTimeout: toNumber(process.env.SMTP_SOCKET_TIMEOUT_MS, 20000),
+    family: toNumber(process.env.SMTP_FAMILY, 4),
+    tls: {
+      minVersion: process.env.SMTP_TLS_MIN_VERSION || "TLSv1.2",
+      rejectUnauthorized: !toBool(process.env.SMTP_TLS_ALLOW_INVALID_CERT, false),
+    },
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
   });
+
+const verifyEmailTransport = async () => {
+  if (!hasEmailConfig()) {
+    return { ok: false, reason: "SMTP config missing" };
+  }
+
+  try {
+    const transporter = getTransporter();
+    await transporter.verify();
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, reason: error.message };
+  }
+};
 
 const sendFineReminderEmail = async ({ user, book, transaction }) => {
   if (!user?.email || user.emailNotificationsOptIn === false || !hasEmailConfig()) {
@@ -59,4 +92,4 @@ const sendReturnEstimateEmail = async ({ user, book, returnDate, fine }) => {
   return true;
 };
 
-module.exports = { hasEmailConfig, sendFineReminderEmail, sendReturnEstimateEmail };
+module.exports = { hasEmailConfig, sendFineReminderEmail, sendReturnEstimateEmail, verifyEmailTransport };
