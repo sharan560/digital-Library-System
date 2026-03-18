@@ -8,6 +8,8 @@ const TransactionsPage = () => {
   const { user } = useAuth();
   const [items, setItems] = useState([]);
   const [studentQuery, setStudentQuery] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
   const [returnDates, setReturnDates] = useState({});
   const [message, setMessage] = useState("");
 
@@ -89,9 +91,14 @@ const TransactionsPage = () => {
     const name = tx.userId?.name || "";
     const email = tx.userId?.email || "";
     const query = studentQuery.trim().toLowerCase();
+    const issueDate = new Date(tx.issueDate);
 
-    if (!query) return true;
-    return name.toLowerCase().includes(query) || email.toLowerCase().includes(query);
+    const queryMatch = !query || name.toLowerCase().includes(query) || email.toLowerCase().includes(query);
+
+    const fromMatch = !fromDate || issueDate >= new Date(`${fromDate}T00:00:00`);
+    const toMatch = !toDate || issueDate <= new Date(`${toDate}T23:59:59`);
+
+    return queryMatch && fromMatch && toMatch;
   }).sort((a, b) => {
     const priority = (status) => {
       if (status === "overdue") return 0;
@@ -114,13 +121,45 @@ const TransactionsPage = () => {
         </div>
       )}
       <div className="ui-panel p-3">
-        <input
-          type="text"
-          placeholder="Search student by name or email"
-          value={studentQuery}
-          onChange={(e) => setStudentQuery(e.target.value)}
-          className="ui-input w-full"
-        />
+        <div className="grid gap-3 md:grid-cols-4">
+          <input
+            type="text"
+            placeholder="Search student by name or email"
+            value={studentQuery}
+            onChange={(e) => setStudentQuery(e.target.value)}
+            className="ui-input w-full md:col-span-2"
+          />
+          <input
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+            className="ui-input w-full"
+            aria-label="Filter transactions from date"
+          />
+          <input
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+            className="ui-input w-full"
+            aria-label="Filter transactions to date"
+          />
+        </div>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <p className="text-xs text-slate-400">Date filter applies to issue date.</p>
+          {(fromDate || toDate || studentQuery) && (
+            <button
+              type="button"
+              onClick={() => {
+                setStudentQuery("");
+                setFromDate("");
+                setToDate("");
+              }}
+              className="ui-btn-secondary text-xs"
+            >
+              Clear Filters
+            </button>
+          )}
+        </div>
       </div>
       <div className="space-y-3 md:hidden">
         {filteredItems.map((tx) => (
@@ -193,7 +232,7 @@ const TransactionsPage = () => {
 
         {filteredItems.length === 0 && (
           <div className="ui-panel p-4 text-center text-sm text-slate-400">
-            No students matched your search.
+            No transactions matched your filters.
           </div>
         )}
       </div>
@@ -272,7 +311,7 @@ const TransactionsPage = () => {
             {filteredItems.length === 0 && (
               <tr>
                 <td colSpan={7} className="p-4 text-center text-slate-400">
-                  No students matched your search.
+                  No transactions matched your filters.
                 </td>
               </tr>
             )}
